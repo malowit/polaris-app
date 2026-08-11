@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">Polaris</string>
+    <string name="settings_button_description">设置</string>
+    <string name="splash_guide_text">跟随向导</string>
+
+    <string name="setup_local_label">Polaris 货币</string>
+    <string name="setup_home_label">我的货币</string>
+    <string name="select_currency_placeholder">需要选择</string>
+    <string name="hint_choose_currencies">开始旅程前\n请选择货币</string>
+    <string name="hint_ready_to_explore">现在你可以开始探索了</string>
+    <string name="rate_updated_just_now">汇率更新：刚刚\n点击更新</string>
+    <string name="rate_updated_today">汇率更新：今天 %1$s\n点击更新</string>
+    <string name="rate_updated_yesterday">汇率更新：昨天 %1$s\n点击更新</string>
+    <string name="calc_input_hint">输入金额，看它闪耀一新</string>
+    <string name="calc_result_format">%1$s%2$s</string>
+    <string name="calc_input_content_description">货币兑换金额输入框</string>
+
+    <string name="result_ambiguous">看起来像电话、日期或时间 — 请重新选择</string>
+    <string name="result_not_found">未能识别价格</string>
+    <string name="result_rate_unavailable">汇率不可用</string>
+    <string name="result_converting">…</string>
+    <string name="go_to_app">前往应用</string>
+    <string name="result_converted_format">%1$s%2$s = %3$s%4$s</string>
+
+    <string name="rate_display_format">1 %1$s%2$s = %3$s%4$s %5$s</string>
+
+    <string name="settings_language_label">语言</string>
+    <string name="settings_feedback_label">反馈</string>
+    <string name="lang_english">english</string>
+    <string name="lang_russian">русский</string>
+    <string name="lang_chinese">中文</string>
+    <string name="active_language_marker">✦</string>
+    <string name="feedback_telegram">电报</string>
+    <string name="feedback_email">邮箱</string>
+    <string name="please_setup_currencies_first">请先在应用中设置货币</string>
+
+    <!-- Guide -->
+    <string name="settings_guide_label">指南</string>
+    <string name="guide_skip">跳过</string>
+    <string name="guide_intro">在探索这个广阔的世界之前，先看看这个指南</string>
+    <string name="guide_step_choose_currencies">在主屏幕上选择你的货币</string>
+    <string name="guide_step_polaris_currency">Polaris 是价格显示所用的货币（例如，如果你查看的是以越南盾标示的价格，请将 VND 选为你的 Polaris 货币）</string>
+    <string name="guide_step_my_currency">我的货币是你习惯使用的货币</string>
+    <string name="guide_step_close_app">选好货币后，你可以关闭应用，开始你的旅程</string>
+    <string name="guide_step_select_text">在任意浏览器中，长按选中一个价格</string>
+    <string name="guide_step_context_menu">选中后，点击操作菜单中的三个点 — 在那里寻找 Polaris</string>
+    <string name="guide_step_result">转换结果会显示在弹出窗口中</string>
+    <string name="guide_outro">一切就绪！祝你旅途愉快</string>
+    <string name="guide_finish_button">前往主菜单</string>
+</resources>

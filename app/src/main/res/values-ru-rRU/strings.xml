@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">Polaris</string>
+    <string name="settings_button_description">Настройки</string>
+    <string name="splash_guide_text">следуй за Полярной звездой</string>
+
+    <string name="setup_local_label">Polaris валюта</string>
+    <string name="setup_home_label">Моя валюта</string>
+    <string name="select_currency_placeholder">необходимо выбрать</string>
+    <string name="hint_choose_currencies">перед началом путешествия\nвыбери валюты</string>
+    <string name="hint_ready_to_explore">можешь начинать своё путешествие</string>
+    <string name="rate_updated_just_now">курс обновлён: только что\nнажми, чтобы обновить</string>
+    <string name="rate_updated_today">курс обновлён: сегодня, %1$s\nнажми, чтобы обновить</string>
+    <string name="rate_updated_yesterday">курс обновлён: вчера, %1$s\nнажми, чтобы обновить</string>
+    <string name="calc_input_hint">введи сумму, чтобы увидеть её в новом свете</string>
+    <string name="calc_result_format">%1$s%2$s</string>
+    <string name="calc_input_content_description">Поле ввода суммы для конвертации валют</string>
+
+    <string name="result_ambiguous">Похоже на телефон, дату или время — уточни выделение</string>
+    <string name="result_not_found">Не удалось распознать цену</string>
+    <string name="result_rate_unavailable">Курс недоступен</string>
+    <string name="result_converting">…</string>
+    <string name="go_to_app">перейти в приложение</string>
+    <string name="result_converted_format">%1$s%2$s = %3$s%4$s</string>
+
+    <string name="rate_display_format">1 %1$s%2$s = %3$s%4$s %5$s</string>
+
+    <string name="settings_language_label">Язык</string>
+    <string name="settings_feedback_label">Обратная связь</string>
+    <string name="lang_english">english</string>
+    <string name="lang_russian">русский</string>
+    <string name="lang_chinese">中文</string>
+    <string name="active_language_marker">✦</string>
+    <string name="feedback_telegram">телеграм</string>
+    <string name="feedback_email">почта</string>
+    <string name="please_setup_currencies_first">Сначала настрой валюты в приложении</string>
+
+    <!-- Guide -->
+    <string name="settings_guide_label">Инструкция</string>
+    <string name="guide_skip">пропустить</string>
+    <string name="guide_intro">Прежде чем исследовать этот необъятный мир, исследуй эту инструкцию</string>
+    <string name="guide_step_choose_currencies">В главном меню выбери валюты</string>
+    <string name="guide_step_polaris_currency">Polaris - это целевая валюта для будущей конверсии.
+(например, если ты ищешь цены во вьетнамских донгах - выбери  ₫VNDкак валюту Polaris)</string>
+    <string name="guide_step_my_currency">Моя валюта - это привычная для тебя валюта</string>
+    <string name="guide_step_close_app">после выбора валют можно закрывать приложение и отправляться в путешестие</string>
+    <string name="guide_step_select_text">в любом браузере выдели цену через долгий тап</string>
+    <string name="guide_step_context_menu">после выделения нажми на три точки в меню действий - ищи там Polaris</string>
+    <string name="guide_step_result">результат конверсии отобразится сверху</string>
+    <string name="guide_outro">Всё готово! Хорошего путешествия</string>
+    <string name="guide_finish_button">в главное меню</string>
+
+</resources>

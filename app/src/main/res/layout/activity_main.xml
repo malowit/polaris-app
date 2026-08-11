@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/settings_star"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/polaris_star"
+        android:layout_gravity="end"
+        android:padding="4dp"
+        android:contentDescription="@string/settings_button_description" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/setup_local_label"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:layout_marginStart="48dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="48dp" />
+
+    <Spinner
+        android:id="@+id/local_currency_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:background="#1A1F4E"
+        android:layout_marginTop="12dp"
+        android:contentDescription="@string/setup_local_label"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/setup_home_label"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:layout_marginStart="48dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="32dp" />
+
+    <Spinner
+        android:id="@+id/home_currency_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:background="#1A1F4E"
+        android:layout_marginTop="12dp"
+        android:contentDescription="@string/setup_home_label" />
+
+    <TextView
+        android:id="@+id/rate_display_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:padding="16dp"
+        android:layout_marginTop="24dp"
+        android:minHeight="56dp" />
+
+    <TextView
+        android:id="@+id/rate_update_hint_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:background="#1A1F4E"
+        android:padding="12dp"
+        android:minHeight="56dp" />
+
+    <EditText
+        android:id="@+id/calc_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:gravity="center"
+        android:background="#1A1F4E"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#FFFFFF"
+        android:textSize="16sp"
+        android:inputType="numberDecimal"
+        android:enabled="false"
+        android:importantForAutofill="no"
+        android:contentDescription="@string/calc_input_content_description"
+        android:layout_marginTop="24dp" />
+
+    <TextView
+        android:id="@+id/calc_result_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:layout_marginTop="1dp" />
+
+    <TextView
+        android:id="@+id/status_hint_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/hint_choose_currencies"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
+        android:gravity="center"
+        android:layout_marginTop="24dp" />
+
+</LinearLayout>

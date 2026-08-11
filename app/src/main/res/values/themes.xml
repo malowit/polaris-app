@@ -1,0 +1,19 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Polaris" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">#0F1235</item>
+        <item name="colorPrimary">#29255F</item>
+        <item name="android:statusBarColor">#0F1235</item>
+        <item name="android:navigationBarColor">#0F1235</item>
+    </style>
+
+    <style name="Theme.Polaris" parent="Base.Theme.Polaris" />
+
+    <style name="Theme.Polaris.Popup" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+</resources>

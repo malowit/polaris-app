@@ -1,0 +1,57 @@
+<resources>
+    <!-- Basic -->
+    <string name="app_name">Polaris</string>
+    <string name="settings_button_description">Settings</string>
+    <string name="splash_guide_text">follow the guide</string>
+
+    <!-- Currency setup screen -->
+    <string name="setup_local_label">Polaris currency</string>
+    <string name="setup_home_label">My currency</string>
+    <string name="select_currency_placeholder">need to choose</string>
+    <string name="hint_choose_currencies">before start your journey\nplease choose currencies</string>
+    <string name="hint_ready_to_explore">now you ready to explore</string>
+    <string name="rate_updated_just_now">currency updated: just now\ntap here to update</string>
+    <string name="rate_updated_today">currency updated: today, %1$s\ntap here to update</string>
+    <string name="rate_updated_yesterday">currency updated: yesterday, %1$s\ntap here to update</string>
+    <string name="calc_input_hint">add an amount to see it shine anew</string>
+    <string name="calc_result_format">%1$s%2$s</string>
+    <string name="calc_input_content_description">Amount input field for currency conversion</string>
+
+    <!-- Result card (popup) -->
+    <string name="result_ambiguous">Looks like a phone/date/time — refine your selection</string>
+    <string name="result_not_found">Could not detect a price</string>
+    <string name="result_rate_unavailable">Rate unavailable</string>
+    <string name="result_converting">…</string>
+    <string name="go_to_app">go to app</string>
+    <string name="result_converted_format">%1$s%2$s = %3$s%4$s</string>
+
+    <!-- Details -->
+    <string name="rate_display_format">1 %1$s%2$s = %3$s%4$s %5$s</string>
+
+    <!-- Settings -->
+    <string name="settings_language_label">Language</string>
+    <string name="settings_feedback_label">Feedback</string>
+    <string name="lang_english">english</string>
+    <string name="lang_russian">русский</string>
+    <string name="lang_chinese">中文</string>
+    <string name="active_language_marker">✦</string>
+    <string name="feedback_telegram">telegram</string>
+    <string name="feedback_email">email</string>
+    <string name="please_setup_currencies_first">Please set up your currencies in the app first</string>
+
+    <!-- Guide -->
+    <string name="settings_guide_label">guide</string>
+
+    <string name="guide_skip">skip</string>
+    <string name="guide_intro">Before exploring this vast world, explore this guide</string>
+    <string name="guide_step_choose_currencies">On the main screen, choose your currencies</string>
+    <string name="guide_step_polaris_currency">Polaris is the currency prices are shown in (for example, if you\'re looking at prices in Vietnamese dong, choose ₫VND as your Polaris currency)</string>
+    <string name="guide_step_my_currency">My currency is the currency you\'re used to</string>
+    <string name="guide_step_close_app">Once currencies are chosen, you can close the app and head off on your journey</string>
+    <string name="guide_step_select_text">In any browser, select a price with a long tap</string>
+    <string name="guide_step_context_menu">After selecting, tap the three dots in the action menu - look for Polaris there</string>
+    <string name="guide_step_result">The conversion result will appear in a popup</string>
+    <string name="guide_outro">All set! Have a great trip</string>
+    <string name="guide_finish_button">to the main menu</string>
+
+</resources>
