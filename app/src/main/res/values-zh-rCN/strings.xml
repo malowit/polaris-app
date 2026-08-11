@@ -1,4 +1,8 @@
 <resources>
+
+    <string name="settings_bubble_label">悬浮泡泡</string>
+    <string name="settings_bubble_toggle_label">显示悬浮泡泡</string>
+
     <string name="app_name">Polaris</string>
     <string name="settings_button_description">设置</string>
     <string name="splash_guide_text">跟随向导</string>

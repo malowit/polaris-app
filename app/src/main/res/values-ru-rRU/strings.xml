@@ -1,4 +1,8 @@
 <resources>
+
+    <string name="settings_bubble_label">Пузырёк</string>
+    <string name="settings_bubble_toggle_label">Показывать плавающий пузырёк</string>
+
     <string name="app_name">Polaris</string>
     <string name="settings_button_description">Настройки</string>
     <string name="splash_guide_text">следуй за Полярной звездой</string>

@@ -1,4 +1,8 @@
 <resources>
+    <!-- Bubble -->
+    <string name="settings_bubble_label">Bubble</string>
+    <string name="settings_bubble_toggle_label">Show floating bubble</string>
+
     <!-- Basic -->
     <string name="app_name">Polaris</string>
     <string name="settings_button_description">Settings</string>

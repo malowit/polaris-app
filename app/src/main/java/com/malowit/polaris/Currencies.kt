@@ -44,7 +44,17 @@ fun saveCurrencyPair(context: android.content.Context, local: String, home: Stri
                 .putString("home_currency", home)
         }
 }
+fun setBubbleEnabled(context: android.content.Context, enabled: Boolean) {
+    context.getSharedPreferences(SETTINGS_PREFS, android.content.Context.MODE_PRIVATE)
+        .edit {
+            putBoolean("bubble_enabled", enabled)
+        }
+}
 
+fun isBubbleEnabled(context: android.content.Context): Boolean {
+    val prefs = context.getSharedPreferences(SETTINGS_PREFS, android.content.Context.MODE_PRIVATE)
+    return prefs.getBoolean("bubble_enabled", false)
+}
 fun getCurrencyPair(context: android.content.Context): Pair<String, String>? {
     val prefs = context.getSharedPreferences(SETTINGS_PREFS, android.content.Context.MODE_PRIVATE)
     val local = prefs.getString("local_currency", null)

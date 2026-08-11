@@ -1,8 +1,11 @@
 package com.malowit.polaris
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.ImageView
+import android.widget.Switch
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -66,6 +69,28 @@ class SettingsActivity : AppCompatActivity() {
             intent.putExtra("fromSplash", false)
             startActivity(intent)
         }
+
+        val bubbleToggle = findViewById<Switch>(R.id.bubble_toggle)
+        bubbleToggle.isChecked = isBubbleEnabled(this)
+
+        bubbleToggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                if (!Settings.canDrawOverlays(this)) {
+                    bubbleToggle.isChecked = false
+                    val overlayIntent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
+                    startActivity(overlayIntent)
+                } else {
+                    setBubbleEnabled(this, true)
+                    startService(Intent(this, BubbleService::class.java))
+                }
+            } else {
+                setBubbleEnabled(this, false)
+                stopService(Intent(this, BubbleService::class.java))
+            }
+        }
     }
 
     private fun setAppLanguage(languageCode: String) {
@@ -108,5 +133,4 @@ class SettingsActivity : AppCompatActivity() {
             setAppLanguage(languageCode)
         }, 150)
     }
-
 }
