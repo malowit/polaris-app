@@ -34,6 +34,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("com.squareup.okhttp3:okhttp:5.4.0")
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.appcompat)

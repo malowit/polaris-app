@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import androidx.core.os.LocaleListCompat
 import androidx.core.view.ViewCompat
@@ -71,7 +72,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         val bubbleToggle = findViewById<Switch>(R.id.bubble_toggle)
-        bubbleToggle.isChecked = isBubbleEnabled(this)
+        bubbleToggle.isChecked = BubbleService.isRunning
 
         bubbleToggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -84,7 +85,9 @@ class SettingsActivity : AppCompatActivity() {
                     startActivity(overlayIntent)
                 } else {
                     setBubbleEnabled(this, true)
-                    startService(Intent(this, BubbleService::class.java))
+                    val intent = Intent(this, ScreenCaptureActivity::class.java)
+                    intent.putExtra("startBubbleAfter", true)
+                    startActivity(intent)
                 }
             } else {
                 setBubbleEnabled(this, false)
@@ -115,7 +118,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun flashView(view: android.view.View) {
         val flashColor = android.graphics.Color.WHITE
-        val originalColor = android.graphics.Color.parseColor("#1A1F4E")
+        val originalColor = "#1A1F4E".toColorInt()
 
         val colorAnimator = android.animation.ValueAnimator.ofObject(
             android.animation.ArgbEvaluator(), flashColor, originalColor

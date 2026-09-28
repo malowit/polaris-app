@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <ScrollView
+        android:id="@+id/guide_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#0F1235">
@@ -15,138 +16,232 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-        <TextView
-            android:id="@+id/guide_skip_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/guide_skip"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:padding="12dp" />
+            <TextView
+                android:id="@+id/guide_skip_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/guide_skip"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:padding="12dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_intro"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:gravity="center"
-            android:layout_marginTop="24dp" />
+            <LinearLayout
+                android:id="@+id/guide_page1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_step_choose_currencies"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_marginTop="32dp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_intro"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:gravity="center"
+                    android:layout_marginTop="24dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_step_polaris_currency"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_step_choose_currencies"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginTop="32dp" />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/guide_polaris_currency"
-            android:layout_marginTop="12dp"
-            android:contentDescription="@null" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_step_polaris_currency"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginTop="16dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_step_my_currency"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_marginTop="24dp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/guide_polaris_currency"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@null" />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/guide_my_currency"
-            android:layout_marginTop="12dp"
-            android:contentDescription="@null" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_step_my_currency"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginTop="24dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_step_close_app"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:layout_marginTop="32dp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/guide_my_currency"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@null" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_step_select_text"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_marginTop="24dp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_step_close_app"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="32dp" />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/guide_select_text"
-            android:layout_marginTop="12dp"
-            android:contentDescription="@null" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_step_select_text"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginTop="24dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_step_context_menu"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_marginTop="24dp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/guide_select_text"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@null" />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/guide_context_menu"
-            android:layout_marginTop="12dp"
-            android:contentDescription="@null" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_step_context_menu"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginTop="24dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_step_result"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:layout_marginTop="24dp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/guide_context_menu"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@null" />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/guide_result_popup"
-            android:layout_marginTop="12dp"
-            android:contentDescription="@null" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_step_result"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="24dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/guide_outro"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:gravity="center"
-            android:layout_marginTop="32dp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/guide_result_popup"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@null" />
 
-        <TextView
-            android:id="@+id/guide_finish_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/guide_finish_button"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:padding="12dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="24dp" />
+                <TextView
+                    android:id="@+id/guide_page2_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/guide_page2_button"
+                    android:textColor="#F0B429"
+                    android:textSize="16sp"
+                    android:padding="12dp"
+                    android:layout_marginTop="24dp" />
+
+                <TextView
+                    android:id="@+id/guide_skip_button_bottom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/guide_skip"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:layout_marginBottom="24dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/guide_page2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_bubble_intro"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="24dp" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/guide_bubble_settings"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_bubble_step_activate"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginTop="24dp" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/guide_bubble_tap"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_bubble_step_draw"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginTop="24dp" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/guide_bubble_draw"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_bubble_step_result"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="24dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guide_outro"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:gravity="center"
+                    android:layout_marginTop="32dp" />
+
+                <TextView
+                    android:id="@+id/guide_finish_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/guide_finish_button"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="24dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

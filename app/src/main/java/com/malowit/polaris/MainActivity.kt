@@ -4,15 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
-import android.widget.AdapterView
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -21,13 +20,19 @@ import java.util.Calendar
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var localSpinner: Spinner
-    private lateinit var homeSpinner: Spinner
+    private lateinit var localAdapter: CurrencyAutoCompleteAdapter
+
+    private lateinit var homeAdapter: CurrencyAutoCompleteAdapter
+    private lateinit var localInput: AutoCompleteTextView
+    private lateinit var homeInput: AutoCompleteTextView
     private lateinit var rateDisplayText: TextView
     private lateinit var rateUpdateHintText: TextView
     private lateinit var calcInput: EditText
     private lateinit var calcResultText: TextView
     private lateinit var statusHintText: TextView
+
+    private var selectedLocalCode: String? = null
+    private var selectedHomeCode: String? = null
 
     private var currentRate: Double? = null
     private var isFirstCalcFocus = true
@@ -42,59 +47,75 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        localSpinner = findViewById(R.id.local_currency_spinner)
-        homeSpinner = findViewById(R.id.home_currency_spinner)
+        localInput = findViewById(R.id.local_currency_spinner)
+        homeInput = findViewById(R.id.home_currency_spinner)
         rateDisplayText = findViewById(R.id.rate_display_text)
         rateUpdateHintText = findViewById(R.id.rate_update_hint_text)
         calcInput = findViewById(R.id.calc_input)
         calcResultText = findViewById(R.id.calc_result_text)
         statusHintText = findViewById(R.id.status_hint_text)
 
-        setupCurrencySpinners()
+        setupCurrencyFields()
         setupCalculator()
         findViewById<ImageView>(R.id.settings_star).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
             @Suppress("DEPRECATION")
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
-
     }
 
-    private fun setupCurrencySpinners() {
-        val placeholder = getString(R.string.select_currency_placeholder)
-        val currencyLabels = listOf(placeholder) + SUPPORTED_CURRENCIES.map { "${it.symbol} ${it.code}" }
-        val adapter = CurrencySpinnerAdapter(this, currencyLabels)
+    private fun setupCurrencyFields() {
+        localAdapter = CurrencyAutoCompleteAdapter(this, POPULAR_LOCAL_CURRENCIES)
+        homeAdapter = CurrencyAutoCompleteAdapter(this, POPULAR_HOME_CURRENCIES)
 
-        localSpinner.adapter = adapter
-        homeSpinner.adapter = adapter
+        localInput.setAdapter(localAdapter)
+        homeInput.setAdapter(homeAdapter)
+
+        localInput.threshold = 0
+        homeInput.threshold = 0
+
+        localInput.setOnItemClickListener { parent, _, position, _ ->
+            val label = parent.getItemAtPosition(position) as String
+            val currency = currencyFromLabel(label)
+            if (currency != null) {
+                selectedLocalCode = currency.code
+                localInput.setText(formatCurrencyShort(currency), false)
+                localInput.clearFocus()
+                updateStatus(forceRefresh = false)
+            }
+        }
+
+        homeInput.setOnItemClickListener { parent, _, position, _ ->
+            val label = parent.getItemAtPosition(position) as String
+            val currency = currencyFromLabel(label)
+            if (currency != null) {
+                selectedHomeCode = currency.code
+                homeInput.setText(formatCurrencyShort(currency), false)
+                homeInput.clearFocus()
+                updateStatus(forceRefresh = false)
+            }
+        }
 
         val savedPair = getCurrencyPair(this)
         if (savedPair != null) {
-            val localIndex = SUPPORTED_CURRENCIES.indexOfFirst { it.code == savedPair.first }
-            val homeIndex = SUPPORTED_CURRENCIES.indexOfFirst { it.code == savedPair.second }
-            if (localIndex >= 0) localSpinner.setSelection(localIndex + 1)
-            if (homeIndex >= 0) homeSpinner.setSelection(homeIndex + 1)
-        }
-
-        val listener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                updateStatus(forceRefresh = false)
+            val local = SUPPORTED_CURRENCIES.find { it.code == savedPair.first }
+            val home = SUPPORTED_CURRENCIES.find { it.code == savedPair.second }
+            if (local != null) {
+                selectedLocalCode = local.code
+                localInput.setText(formatCurrencyShort(local), false)
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            if (home != null) {
+                selectedHomeCode = home.code
+                homeInput.setText(formatCurrencyShort(home), false)
+            }
+            updateStatus(forceRefresh = false)
         }
-
-        localSpinner.onItemSelectedListener = listener
-        homeSpinner.onItemSelectedListener = listener
     }
 
     private fun getSelectedCurrencies(): Pair<String, String>? {
-        val localPosition = localSpinner.selectedItemPosition
-        val homePosition = homeSpinner.selectedItemPosition
-        if (localPosition == 0 || homePosition == 0) return null
-        return Pair(
-            SUPPORTED_CURRENCIES[localPosition - 1].code,
-            SUPPORTED_CURRENCIES[homePosition - 1].code
-        )
+        val local = selectedLocalCode
+        val home = selectedHomeCode
+        return if (local != null && home != null) Pair(local, home) else null
     }
 
     private fun updateStatus(forceRefresh: Boolean) {
@@ -151,9 +172,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun flashView(view: View) {
+    private fun flashView(view: android.view.View) {
         val flashColor = android.graphics.Color.WHITE
-        val originalColor = android.graphics.Color.parseColor("#1A1F4E")
+        val originalColor = "#1A1F4E".toColorInt()
 
         val colorAnimator = android.animation.ValueAnimator.ofObject(
             android.animation.ArgbEvaluator(), flashColor, originalColor

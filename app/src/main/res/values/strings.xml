@@ -2,6 +2,8 @@
     <!-- Bubble -->
     <string name="settings_bubble_label">Bubble</string>
     <string name="settings_bubble_toggle_label">Show floating bubble</string>
+    <string name="bubble_menu_select_element">Select element</string>
+    <string name="draw_overlay_hint">Draw around the price</string>
 
     <!-- Basic -->
     <string name="app_name">Polaris</string>
@@ -11,7 +13,7 @@
     <!-- Currency setup screen -->
     <string name="setup_local_label">Polaris currency</string>
     <string name="setup_home_label">My currency</string>
-    <string name="select_currency_placeholder">need to choose</string>
+    <string name="currency_search_hint">tap to find</string>
     <string name="hint_choose_currencies">before start your journey\nplease choose currencies</string>
     <string name="hint_ready_to_explore">now you ready to explore</string>
     <string name="rate_updated_just_now">currency updated: just now\ntap here to update</string>
@@ -55,6 +57,13 @@
     <string name="guide_step_select_text">In any browser, select a price with a long tap</string>
     <string name="guide_step_context_menu">After selecting, tap the three dots in the action menu - look for Polaris there</string>
     <string name="guide_step_result">The conversion result will appear in a popup</string>
+
+    <string name="guide_page2_button">Page 2 →</string>
+    <string name="guide_bubble_intro">You can also convert prices by selecting them directly on any screen. This works through a special bubble — activate it in Settings</string>
+    <string name="guide_bubble_step_activate">After activating and granting permissions, tap the bubble wherever you need it</string>
+    <string name="guide_bubble_step_draw">Then trace over the price with your finger</string>
+    <string name="guide_bubble_step_result">The conversion will appear at the top of the screen</string>
+
     <string name="guide_outro">All set! Have a great trip</string>
     <string name="guide_finish_button">to the main menu</string>
 

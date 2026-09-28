@@ -3,6 +3,7 @@ package com.malowit.polaris
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
+import androidx.core.content.edit
 import android.os.Bundle
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
@@ -26,7 +27,7 @@ class SplashActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_splash)
-        prefs.edit().putBoolean("splash_seen", true).apply()
+        prefs.edit { putBoolean("splash_seen", true) }
 
         playSplashAnimation()
     }

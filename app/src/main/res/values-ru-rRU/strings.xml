@@ -2,6 +2,8 @@
 
     <string name="settings_bubble_label">Пузырёк</string>
     <string name="settings_bubble_toggle_label">Показывать плавающий пузырёк</string>
+    <string name="bubble_menu_select_element">Выберите элемент</string>
+    <string name="draw_overlay_hint">Обведи цену</string>
 
     <string name="app_name">Polaris</string>
     <string name="settings_button_description">Настройки</string>
@@ -9,7 +11,7 @@
 
     <string name="setup_local_label">Polaris валюта</string>
     <string name="setup_home_label">Моя валюта</string>
-    <string name="select_currency_placeholder">необходимо выбрать</string>
+    <string name="currency_search_hint">нажми, чтобы найти</string>
     <string name="hint_choose_currencies">перед началом путешествия\nвыбери валюты</string>
     <string name="hint_ready_to_explore">можешь начинать своё путешествие</string>
     <string name="rate_updated_just_now">курс обновлён: только что\nнажми, чтобы обновить</string>
@@ -50,6 +52,13 @@
     <string name="guide_step_select_text">в любом браузере выдели цену через долгий тап</string>
     <string name="guide_step_context_menu">после выделения нажми на три точки в меню действий - ищи там Polaris</string>
     <string name="guide_step_result">результат конверсии отобразится сверху</string>
+
+    <string name="guide_page2_button">Страница 2 →</string>
+    <string name="guide_bubble_intro">Также вы можете конвертировать цены через их прямое выделение на любой странице. Это происходит через специальный бабл — активируйте его в настройках</string>
+    <string name="guide_bubble_step_activate">После активации и принятия разрешений можно тапнуть на бабл в необходимом месте</string>
+    <string name="guide_bubble_step_draw">Далее обведите пальцем цену</string>
+    <string name="guide_bubble_step_result">Конверсия отобразится сверху экрана</string>
+
     <string name="guide_outro">Всё готово! Хорошего путешествия</string>
     <string name="guide_finish_button">в главное меню</string>
 

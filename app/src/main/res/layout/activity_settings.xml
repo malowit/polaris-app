@@ -3,8 +3,7 @@
     android:id="@+id/settings_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#0F1235">
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/settings_star"

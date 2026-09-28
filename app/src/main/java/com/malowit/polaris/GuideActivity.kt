@@ -3,6 +3,8 @@ package com.malowit.polaris
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -35,8 +37,22 @@ class GuideActivity : AppCompatActivity() {
             exitGuide()
         }
 
+        findViewById<TextView>(R.id.guide_skip_button_bottom).setOnClickListener {
+            exitGuide()
+        }
+
         findViewById<TextView>(R.id.guide_finish_button).setOnClickListener {
             exitGuide()
+        }
+
+        val page1 = findViewById<LinearLayout>(R.id.guide_page1)
+        val page2 = findViewById<LinearLayout>(R.id.guide_page2)
+        val scrollView = findViewById<ScrollView>(R.id.guide_scroll)
+
+        findViewById<TextView>(R.id.guide_page2_button).setOnClickListener {
+            page1.visibility = View.GONE
+            page2.visibility = View.VISIBLE
+            scrollView.post { scrollView.scrollTo(0, 0) }
         }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {

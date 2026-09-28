@@ -1,14 +1,43 @@
 package com.malowit.polaris
 
+import android.animation.ObjectAnimator
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
-import kotlin.math.abs
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.PixelFormat
+import android.graphics.Rect
+import android.hardware.display.VirtualDisplay
+import android.media.ImageReader
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
+import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.util.DisplayMetrics
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.app.NotificationCompat
+import androidx.core.graphics.toColorInt
+import androidx.core.view.isVisible
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import android.view.View
+import kotlin.math.abs
 
 class BubbleService : Service() {
     private lateinit var windowManager: WindowManager
@@ -20,6 +49,16 @@ class BubbleService : Service() {
     private var initialTouchX = 0f
     private var initialTouchY = 0f
 
+    private var mediaProjection: MediaProjection? = null
+    private var drawOverlayView: View? = null
+    private var resultPopupView: View? = null
+
+    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    companion object {
+        var isRunning = false
+    }
+
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -27,6 +66,10 @@ class BubbleService : Service() {
         bubbleView = ImageView(this).apply {
             setImageResource(R.drawable.polaris_star)
             setPadding(24, 24, 24, 24)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.OVAL
+                setColor("#66000000".toColorInt())
+            }
         }
 
         val layoutFlag = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -44,9 +87,59 @@ class BubbleService : Service() {
 
         windowManager.addView(bubbleView, params)
         setupDragging()
+
+        isRunning = true
     }
 
-    @android.annotation.SuppressLint("ClickableViewAccessibility")
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val resultCode = intent?.getIntExtra("resultCode", Int.MIN_VALUE) ?: Int.MIN_VALUE
+        val resultData: Intent? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent?.getParcelableExtra("resultData", Intent::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent?.getParcelableExtra("resultData")
+        }
+
+        if (resultCode != Int.MIN_VALUE && resultData != null) {
+            startForegroundWithNotification()
+            val projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            mediaProjection = projectionManager.getMediaProjection(resultCode, resultData)
+        }
+
+        return START_STICKY
+    }
+
+    private fun startForegroundWithNotification() {
+        val channelId = "polaris_bubble_service"
+
+
+        val channel = NotificationChannel(
+                channelId,
+                "Polaris bubble",
+                NotificationManager.IMPORTANCE_LOW
+        )
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
+
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Polaris")
+            .setContentText("Bubble is active")
+            .setSmallIcon(R.drawable.polaris_star)
+            .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                1,
+                notification,
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            )
+        } else {
+            startForeground(1, notification)
+        }
+    }
+
+    @Suppress("ClickableViewAccessibility")
     private fun setupDragging() {
         bubbleView.setOnTouchListener { v, event ->
             when (event.action) {
@@ -68,6 +161,7 @@ class BubbleService : Service() {
                     val deltaY = abs(event.rawY - initialTouchY)
                     if (deltaX < 10 && deltaY < 10) {
                         v.performClick()
+                        showBubbleMenu(v)
                     }
                     true
                 }
@@ -76,12 +170,351 @@ class BubbleService : Service() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::bubbleView.isInitialized) {
-            windowManager.removeView(bubbleView)
+    private fun showBubbleMenu(anchor: View) {
+        val popup = android.widget.PopupMenu(this, anchor)
+        popup.menu.add(0, 1, 0, getString(R.string.bubble_menu_select_element))
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                1 -> {
+                    captureScreen()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun captureScreen() {
+        val projection = mediaProjection ?: return
+
+        val metrics = DisplayMetrics()
+        @Suppress("DEPRECATION")
+        windowManager.defaultDisplay.getRealMetrics(metrics)
+
+        val width = metrics.widthPixels
+        val height = metrics.heightPixels
+        val density = metrics.densityDpi
+
+        val imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
+
+        val virtualDisplay: VirtualDisplay? = projection.createVirtualDisplay(
+            "PolarisScreenCapture",
+            width, height, density,
+            android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+            imageReader.surface,
+            null, null
+        )
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            val image = imageReader.acquireLatestImage()
+            if (image != null) {
+                val planes = image.planes
+                val buffer = planes[0].buffer
+                val pixelStride = planes[0].pixelStride
+                val rowStride = planes[0].rowStride
+                val rowPadding = rowStride - pixelStride * width
+
+                val bitmap = Bitmap.createBitmap(
+                    width + rowPadding / pixelStride,
+                    height,
+                    Bitmap.Config.ARGB_8888
+                )
+                bitmap.copyPixelsFromBuffer(buffer)
+                image.close()
+
+                val croppedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height)
+                showDrawOverlay(croppedBitmap)
+            }
+
+            virtualDisplay?.release()
+            imageReader.close()
+        }, 300)
+    }
+
+    private fun showDrawOverlay(bitmap: Bitmap) {
+        val root = FrameLayout(this)
+
+        val imageView = ImageView(this).apply {
+            setImageBitmap(bitmap)
+            scaleType = ImageView.ScaleType.FIT_XY
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+        root.addView(imageView)
+
+        val hintText = TextView(this).apply {
+            text = getString(R.string.draw_overlay_hint)
+            setTextColor(Color.WHITE)
+            textSize = 16f
+            gravity = Gravity.CENTER
+            setBackgroundColor("#AA0F1235".toColorInt())
+            setPadding(24, 24, 24, 24)
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 100
+            }
+        }
+        root.addView(hintText)
+
+        lateinit var selectionViewRef: SelectionOverlayView
+        val selectionView = SelectionOverlayView(this) { rect ->
+            handleDrawSelection(bitmap, rect, selectionViewRef.width, selectionViewRef.height)
+        }
+        selectionView.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        root.addView(selectionView)
+        selectionViewRef = selectionView
+
+        val overlayParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.TRANSLUCENT
+        )
+
+        windowManager.addView(root, overlayParams)
+        drawOverlayView = root
+    }
+
+    private fun removeDrawOverlay() {
+        drawOverlayView?.let {
+            windowManager.removeView(it)
+            drawOverlayView = null
         }
     }
 
+    private fun handleDrawSelection(bitmap: Bitmap, rect: Rect, viewWidth: Int, viewHeight: Int) {
+        val scaleX = bitmap.width.toFloat() / viewWidth
+        val scaleY = bitmap.height.toFloat() / viewHeight
+
+        val safeRect = Rect(
+            (rect.left * scaleX).toInt().coerceIn(0, bitmap.width),
+            (rect.top * scaleY).toInt().coerceIn(0, bitmap.height),
+            (rect.right * scaleX).toInt().coerceIn(0, bitmap.width),
+            (rect.bottom * scaleY).toInt().coerceIn(0, bitmap.height)
+        )
+
+        removeDrawOverlay()
+
+        if (safeRect.width() < 10 || safeRect.height() < 10) {
+            return
+        }
+
+        val croppedBitmap = Bitmap.createBitmap(
+            bitmap,
+            safeRect.left,
+            safeRect.top,
+            safeRect.width(),
+            safeRect.height()
+        )
+
+        runOcr(croppedBitmap)
+    }
+
+    private fun runOcr(bitmap: Bitmap) {
+        val image = InputImage.fromBitmap(bitmap, 0)
+        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                showResultPopup(visionText.text)
+            }
+            .addOnFailureListener {
+                showResultPopup("")
+            }
+    }
+
+    private fun showResultPopup(selectedText: String) {
+        val savedPair = getCurrencyPair(this)
+
+        val inflater = LayoutInflater.from(this)
+        val container = FrameLayout(this)
+        inflater.inflate(R.layout.activity_popup, container, true)
+
+        val card = container.findViewById<LinearLayout>(R.id.card)
+        val details = container.findViewById<LinearLayout>(R.id.details)
+        val resultText = container.findViewById<TextView>(R.id.result_text)
+        val rateText = container.findViewById<TextView>(R.id.rate_text)
+        val goToAppButton = container.findViewById<TextView>(R.id.go_to_app_button)
+
+        val popupParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.TRANSLUCENT
+        )
+
+        windowManager.addView(container, popupParams)
+        resultPopupView = container
+
+        ObjectAnimator.ofFloat(card, "alpha", 0f, 1f).apply {
+            duration = 300
+            start()
+        }
+
+        container.setOnClickListener {
+            removeResultPopup()
+        }
+
+        if (savedPair == null) {
+            resultText.text = getString(R.string.please_setup_currencies_first)
+            resultText.setOnClickListener {
+                removeResultPopup()
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+            }
+            return
+        }
+
+        val (localCurrency, homeCurrency) = savedPair
+
+        card.setOnClickListener {
+            details.visibility = if (details.isVisible) View.GONE else View.VISIBLE
+        }
+
+        goToAppButton.setOnClickListener {
+            removeResultPopup()
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+        }
+
+        if (looksAmbiguous(selectedText)) {
+            resultText.text = getString(R.string.result_ambiguous)
+        } else {
+            val price = extractPrice(selectedText)
+            if (price != null) {
+                performConversion(price, localCurrency, homeCurrency, resultText, rateText)
+            } else {
+                resultText.text = getString(R.string.result_not_found)
+            }
+        }
+    }
+
+    private fun performConversion(
+        price: Double,
+        localCurrency: String,
+        homeCurrency: String,
+        resultText: TextView,
+        rateText: TextView
+    ) {
+        resultText.text = getString(R.string.result_converting)
+        serviceScope.launch {
+            val rate = getRate(this@BubbleService, localCurrency, homeCurrency)
+            if (rate != null) {
+                val converted = price * rate
+                val localSymbol = SUPPORTED_CURRENCIES.find { it.code == localCurrency }?.symbol ?: localCurrency
+                val homeSymbol = SUPPORTED_CURRENCIES.find { it.code == homeCurrency }?.symbol ?: homeCurrency
+
+                resultText.text = getString(
+                    R.string.result_converted_format,
+                    localSymbol, "%.2f".format(price), homeSymbol, "%.2f".format(converted)
+                )
+
+                val display = formatRateForDisplay(localCurrency, homeCurrency, rate)
+                val fromSymbol = SUPPORTED_CURRENCIES.find { it.code == display.fromCode }?.symbol ?: display.fromCode
+                val toSymbol = SUPPORTED_CURRENCIES.find { it.code == display.toCode }?.symbol ?: display.toCode
+                rateText.text = getString(
+                    R.string.rate_display_format,
+                    fromSymbol, display.fromCode, toSymbol, "%.2f".format(display.rate), display.toCode
+                )
+            } else {
+                resultText.text = getString(R.string.result_rate_unavailable)
+            }
+        }
+    }
+
+    private fun removeResultPopup() {
+        resultPopupView?.let {
+            windowManager.removeView(it)
+            resultPopupView = null
+        }
+    }
+
+    override fun onDestroy() {
+        isRunning = false
+        super.onDestroy()
+        removeDrawOverlay()
+        removeResultPopup()
+        if (::bubbleView.isInitialized) {
+            windowManager.removeView(bubbleView)
+        }
+        mediaProjection?.stop()
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
+}
+
+@Suppress("ClickableViewAccessibility")
+class SelectionOverlayView(
+    context: android.content.Context,
+    private val onSelectionComplete: (Rect) -> Unit
+) : View(context) {
+
+    private val pathPaint = android.graphics.Paint().apply {
+        color = "#F0B429".toColorInt()
+        style = android.graphics.Paint.Style.STROKE
+        strokeWidth = 60f
+        strokeJoin = android.graphics.Paint.Join.ROUND
+        strokeCap = android.graphics.Paint.Cap.ROUND
+        isAntiAlias = true
+        alpha = 140
+    }
+
+    private val dimPaint = android.graphics.Paint().apply {
+        color = "#66000000".toColorInt()
+    }
+
+    private val path = android.graphics.Path()
+    private var isDrawing = false
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                path.reset()
+                path.moveTo(event.x, event.y)
+                isDrawing = true
+                invalidate()
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (isDrawing) {
+                    path.lineTo(event.x, event.y)
+                    invalidate()
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                isDrawing = false
+                path.close()
+
+                val bounds = android.graphics.RectF()
+                path.computeBounds(bounds, true)
+
+                val rect = Rect(
+                    bounds.left.toInt(),
+                    bounds.top.toInt(),
+                    bounds.right.toInt(),
+                    bounds.bottom.toInt()
+                )
+
+                onSelectionComplete(rect)
+            }
+        }
+        return true
+    }
+
+    override fun onDraw(canvas: android.graphics.Canvas) {
+        super.onDraw(canvas)
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), dimPaint)
+        canvas.drawPath(path, pathPaint)
+    }
 }

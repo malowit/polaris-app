@@ -2,6 +2,8 @@
 
     <string name="settings_bubble_label">悬浮泡泡</string>
     <string name="settings_bubble_toggle_label">显示悬浮泡泡</string>
+    <string name="bubble_menu_select_element">选择元素</string>
+    <string name="draw_overlay_hint">圈出价格</string>
 
     <string name="app_name">Polaris</string>
     <string name="settings_button_description">设置</string>
@@ -9,7 +11,7 @@
 
     <string name="setup_local_label">Polaris 货币</string>
     <string name="setup_home_label">我的货币</string>
-    <string name="select_currency_placeholder">需要选择</string>
+    <string name="currency_search_hint">点击查找</string>
     <string name="hint_choose_currencies">开始旅程前\n请选择货币</string>
     <string name="hint_ready_to_explore">现在你可以开始探索了</string>
     <string name="rate_updated_just_now">汇率更新：刚刚\n点击更新</string>
@@ -49,6 +51,13 @@
     <string name="guide_step_select_text">在任意浏览器中，长按选中一个价格</string>
     <string name="guide_step_context_menu">选中后，点击操作菜单中的三个点 — 在那里寻找 Polaris</string>
     <string name="guide_step_result">转换结果会显示在弹出窗口中</string>
+
+    <string name="guide_page2_button">第2页 →</string>
+    <string name="guide_bubble_intro">你也可以直接在任意屏幕上选中价格进行转换。这需要通过一个特殊的悬浮泡泡实现——请在设置中激活它</string>
+    <string name="guide_bubble_step_activate">激活并授予权限后，你可以在需要的地方点击悬浮泡泡</string>
+    <string name="guide_bubble_step_draw">然后用手指划过价格</string>
+    <string name="guide_bubble_step_result">转换结果会显示在屏幕顶部</string>
+
     <string name="guide_outro">一切就绪！祝你旅途愉快</string>
     <string name="guide_finish_button">前往主菜单</string>
 </resources>

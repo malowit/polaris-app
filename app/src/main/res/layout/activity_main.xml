@@ -24,14 +24,22 @@
         android:layout_marginEnd="24dp"
         android:layout_marginTop="48dp" />
 
-    <Spinner
+    <AutoCompleteTextView
         android:id="@+id/local_currency_spinner"
+        android:hint="@string/currency_search_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="56dp"
         android:background="#1A1F4E"
-        android:layout_marginTop="12dp"
-        android:contentDescription="@string/setup_local_label"/>
+        android:textColor="#FFFFFF"
+        android:textColorHint="#FFFFFF"
+        android:popupBackground="@drawable/card_background"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:padding="16dp"
+        android:inputType="text"
+        android:completionThreshold="1"
+        android:layout_marginTop="12dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -43,14 +51,22 @@
         android:layout_marginEnd="24dp"
         android:layout_marginTop="32dp" />
 
-    <Spinner
+    <AutoCompleteTextView
         android:id="@+id/home_currency_spinner"
+        android:hint="@string/currency_search_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="56dp"
         android:background="#1A1F4E"
-        android:layout_marginTop="12dp"
-        android:contentDescription="@string/setup_home_label" />
+        android:textColor="#FFFFFF"
+        android:textColorHint="#FFFFFF"
+        android:popupBackground="@drawable/card_background"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:padding="16dp"
+        android:inputType="text"
+        android:completionThreshold="1"
+        android:layout_marginTop="12dp" />
 
     <TextView
         android:id="@+id/rate_display_text"
