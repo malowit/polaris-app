@@ -6,10 +6,17 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.Rect
+import android.graphics.RectF
+import android.graphics.drawable.GradientDrawable
+import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.Image
 import android.media.ImageReader
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -21,10 +28,12 @@ import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.toColorInt
@@ -36,10 +45,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import android.view.View
 import kotlin.math.abs
 
 class BubbleService : Service() {
+
+    companion object {
+        var isRunning = false
+    }
+
     private lateinit var windowManager: WindowManager
     private lateinit var bubbleView: ImageView
     private lateinit var params: WindowManager.LayoutParams
@@ -49,15 +62,20 @@ class BubbleService : Service() {
     private var initialTouchX = 0f
     private var initialTouchY = 0f
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     private var mediaProjection: MediaProjection? = null
+    private var projectionCallback: MediaProjection.Callback? = null
+
+    private var virtualDisplay: VirtualDisplay? = null
+    private var captureReader: ImageReader? = null
+    private var captureTimeout: Runnable? = null
+    private var isCapturing = false
+
     private var drawOverlayView: View? = null
     private var resultPopupView: View? = null
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-
-    companion object {
-        var isRunning = false
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -66,18 +84,16 @@ class BubbleService : Service() {
         bubbleView = ImageView(this).apply {
             setImageResource(R.drawable.polaris_star)
             setPadding(24, 24, 24, 24)
-            background = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.OVAL
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
                 setColor("#66000000".toColorInt())
             }
         }
 
-        val layoutFlag = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-
         params = WindowManager.LayoutParams(
             120,
             120,
-            layoutFlag,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         )
@@ -87,7 +103,6 @@ class BubbleService : Service() {
 
         windowManager.addView(bubbleView, params)
         setupDragging()
-
         isRunning = true
     }
 
@@ -103,24 +118,39 @@ class BubbleService : Service() {
         if (resultCode != Int.MIN_VALUE && resultData != null) {
             startForegroundWithNotification()
             val projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-            mediaProjection = projectionManager.getMediaProjection(resultCode, resultData)
+            val projection = projectionManager.getMediaProjection(resultCode, resultData)
+            if (projection == null) {
+                stopSelf()
+                return START_NOT_STICKY
+            }
+            mediaProjection = projection
+
+            val callback = object : MediaProjection.Callback() {
+                override fun onStop() {
+                    releaseCapture()
+                    mediaProjection = null
+                    stopSelf()
+                }
+            }
+            projectionCallback = callback
+            projection.registerCallback(callback, mainHandler)
+
+            createCaptureDisplay(projection)
         }
 
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     private fun startForegroundWithNotification() {
         val channelId = "polaris_bubble_service"
 
-
         val channel = NotificationChannel(
-                channelId,
-                "Polaris bubble",
-                NotificationManager.IMPORTANCE_LOW
+            channelId,
+            "Polaris bubble",
+            NotificationManager.IMPORTANCE_LOW
         )
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
-
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Polaris")
@@ -171,7 +201,7 @@ class BubbleService : Service() {
     }
 
     private fun showBubbleMenu(anchor: View) {
-        val popup = android.widget.PopupMenu(this, anchor)
+        val popup = PopupMenu(this, anchor)
         popup.menu.add(0, 1, 0, getString(R.string.bubble_menu_select_element))
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -185,51 +215,116 @@ class BubbleService : Service() {
         popup.show()
     }
 
-    private fun captureScreen() {
-        val projection = mediaProjection ?: return
-
+    private fun currentScreenSize(): Triple<Int, Int, Int> {
         val metrics = DisplayMetrics()
         @Suppress("DEPRECATION")
         windowManager.defaultDisplay.getRealMetrics(metrics)
+        return Triple(metrics.widthPixels, metrics.heightPixels, metrics.densityDpi)
+    }
 
-        val width = metrics.widthPixels
-        val height = metrics.heightPixels
-        val density = metrics.densityDpi
-
-        val imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
-
-        val virtualDisplay: VirtualDisplay? = projection.createVirtualDisplay(
+    // Виртуальный дисплей создаётся один раз и без поверхности: пока поверхности нет, он ничего не рисует.
+    private fun createCaptureDisplay(projection: MediaProjection) {
+        releaseCapture()
+        val (width, height, dpi) = currentScreenSize()
+        virtualDisplay = projection.createVirtualDisplay(
             "PolarisScreenCapture",
-            width, height, density,
-            android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            imageReader.surface,
-            null, null
+            width, height, dpi,
+            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+            null, null, null
         )
+    }
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            val image = imageReader.acquireLatestImage()
-            if (image != null) {
-                val planes = image.planes
-                val buffer = planes[0].buffer
-                val pixelStride = planes[0].pixelStride
-                val rowStride = planes[0].rowStride
-                val rowPadding = rowStride - pixelStride * width
+    private fun releaseCapture() {
+        captureTimeout?.let { mainHandler.removeCallbacks(it) }
+        captureTimeout = null
+        isCapturing = false
+        captureReader?.setOnImageAvailableListener(null, null)
+        captureReader?.close()
+        captureReader = null
+        virtualDisplay?.release()
+        virtualDisplay = null
+    }
 
-                val bitmap = Bitmap.createBitmap(
-                    width + rowPadding / pixelStride,
-                    height,
-                    Bitmap.Config.ARGB_8888
-                )
-                bitmap.copyPixelsFromBuffer(buffer)
-                image.close()
+    private fun captureScreen() {
+        if (virtualDisplay == null || isCapturing) return
+        isCapturing = true
 
-                val croppedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height)
-                showDrawOverlay(croppedBitmap)
+        // Пауза, чтобы меню успело закрыться и не попало в снимок
+        mainHandler.postDelayed({
+            val display = virtualDisplay
+            if (display == null) {
+                isCapturing = false
+                return@postDelayed
             }
 
-            virtualDisplay?.release()
-            imageReader.close()
+            val (width, height, dpi) = currentScreenSize()
+            val reader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
+            captureReader = reader
+            reader.setOnImageAvailableListener({ r ->
+                val image = r.acquireLatestImage()
+                if (image != null) {
+                    finishCapture(image)
+                }
+            }, mainHandler)
+
+            display.resize(width, height, dpi)
+            display.setSurface(reader.surface)
+
+            val timeout = Runnable { finishCapture(captureReader?.acquireLatestImage()) }
+            captureTimeout = timeout
+            mainHandler.postDelayed(timeout, 2000)
         }, 300)
+    }
+
+    private fun finishCapture(image: Image?) {
+        if (!isCapturing) {
+            image?.close()
+            return
+        }
+        isCapturing = false
+
+        captureTimeout?.let { mainHandler.removeCallbacks(it) }
+        captureTimeout = null
+
+        // Сразу отключаем поверхность: дисплей снова ничего не рисует
+        virtualDisplay?.setSurface(null)
+
+        val reader = captureReader
+        captureReader = null
+        reader?.setOnImageAvailableListener(null, null)
+
+        var bitmap: Bitmap? = null
+        if (image != null) {
+            bitmap = imageToBitmap(image)
+            image.close()
+        }
+        reader?.close()
+
+        if (bitmap != null) {
+            showDrawOverlay(bitmap)
+        }
+    }
+
+    private fun imageToBitmap(image: Image): Bitmap {
+        val width = image.width
+        val height = image.height
+        val plane = image.planes[0]
+        val buffer = plane.buffer
+        val pixelStride = plane.pixelStride
+        val rowPadding = plane.rowStride - pixelStride * width
+
+        val padded = Bitmap.createBitmap(
+            width + rowPadding / pixelStride,
+            height,
+            Bitmap.Config.ARGB_8888
+        )
+        padded.copyPixelsFromBuffer(buffer)
+
+        return if (rowPadding == 0) {
+            padded
+        } else {
+            Bitmap.createBitmap(padded, 0, 0, width, height)
+        }
     }
 
     private fun showDrawOverlay(bitmap: Bitmap) {
@@ -449,7 +544,10 @@ class BubbleService : Service() {
         if (::bubbleView.isInitialized) {
             windowManager.removeView(bubbleView)
         }
+        releaseCapture()
+        projectionCallback?.let { mediaProjection?.unregisterCallback(it) }
         mediaProjection?.stop()
+        mediaProjection = null
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -461,21 +559,21 @@ class SelectionOverlayView(
     private val onSelectionComplete: (Rect) -> Unit
 ) : View(context) {
 
-    private val pathPaint = android.graphics.Paint().apply {
+    private val pathPaint = Paint().apply {
         color = "#F0B429".toColorInt()
-        style = android.graphics.Paint.Style.STROKE
+        style = Paint.Style.STROKE
         strokeWidth = 60f
-        strokeJoin = android.graphics.Paint.Join.ROUND
-        strokeCap = android.graphics.Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+        strokeCap = Paint.Cap.ROUND
         isAntiAlias = true
         alpha = 140
     }
 
-    private val dimPaint = android.graphics.Paint().apply {
+    private val dimPaint = Paint().apply {
         color = "#66000000".toColorInt()
     }
 
-    private val path = android.graphics.Path()
+    private val path = Path()
     private var isDrawing = false
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -496,7 +594,7 @@ class SelectionOverlayView(
                 isDrawing = false
                 path.close()
 
-                val bounds = android.graphics.RectF()
+                val bounds = RectF()
                 path.computeBounds(bounds, true)
 
                 val rect = Rect(
@@ -512,7 +610,7 @@ class SelectionOverlayView(
         return true
     }
 
-    override fun onDraw(canvas: android.graphics.Canvas) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), dimPaint)
         canvas.drawPath(path, pathPaint)
